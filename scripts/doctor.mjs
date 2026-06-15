@@ -22,6 +22,18 @@ function commandVersion(command, args = ['--version']) {
   };
 }
 
+function pythonImport(command, moduleName) {
+  const result = spawnSync(command, [
+    '-c',
+    `import ${moduleName}; print(getattr(${moduleName}, "__version__", "installed"))`,
+  ], { cwd: PROJECT_ROOT, encoding: 'utf8', timeout: 10000 });
+  return {
+    ok: result.status === 0,
+    version: (result.stdout || '').trim(),
+    error: result.status === 0 ? '' : (result.stderr || result.stdout || '').trim().split(/\r?\n/).slice(-1)[0],
+  };
+}
+
 async function fileExists(file) {
   if (!file) return false;
   try {
@@ -64,6 +76,8 @@ async function main() {
     ffprobe: commandVersion('ffprobe', ['-version']),
     curl: commandVersion('curl.exe', ['--version']),
     python: commandVersion(config.transcription.python, ['--version']),
+    faster_whisper: pythonImport(config.transcription.python, 'faster_whisper'),
+    ctranslate2: pythonImport(config.transcription.python, 'ctranslate2'),
     git: commandExists('git.exe'),
     wx_channel: await checkWxChannel(config.wxChannelBaseUrl),
     accounts_configured: accountsConfigured(config).length,
@@ -74,9 +88,10 @@ async function main() {
   };
 
   const hardFailures = [];
-  for (const name of ['node', 'ffmpeg', 'ffprobe', 'curl', 'python']) {
+  for (const name of ['node', 'ffmpeg', 'ffprobe', 'curl', 'python', 'faster_whisper', 'ctranslate2']) {
     if (!checks[name].ok) hardFailures.push(name);
   }
+  if (!checks.wx_channel.ok) hardFailures.push('wx_channel');
   if (!checks.accounts_configured) hardFailures.push('accounts');
 
   console.log(JSON.stringify({

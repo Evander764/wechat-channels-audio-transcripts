@@ -39,10 +39,19 @@ cd wechat-channels-audio-transcripts
 npm run setup
 ```
 
+Create a Python environment for transcription:
+
+```powershell
+python -m venv .runtime\transcript-venv
+.\.runtime\transcript-venv\Scripts\python.exe -m pip install --upgrade pip
+.\.runtime\transcript-venv\Scripts\python.exe -m pip install faster-whisper ctranslate2
+```
+
 Edit `wechat.config.json`:
 
 - replace `accounts[0].username` with the raw Video Channels username from `wx_channel`;
 - set `accounts[0].name` and `slug`;
+- set `transcription.python` to `.runtime\transcript-venv\Scripts\python.exe`;
 - adjust `outputRoot`, `workRoot`, download concurrency, and transcription settings if needed.
 
 Then check the local environment:

@@ -6,7 +6,7 @@
   "maxPages": 300,
   "accounts": [
     {
-      "name": "示例视频号名称",
+      "name": "Example WeChat Channels account",
       "slug": "example-account",
       "username": "v2_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@finder"
     }
