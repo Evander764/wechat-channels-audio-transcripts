@@ -14,6 +14,7 @@
     "verify": "node scripts/cli.mjs verify",
     "package": "node scripts/cli.mjs package",
     "run": "node scripts/cli.mjs run",
+    "bootstrap:windows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap-windows.ps1",
     "check": "node --check scripts/config.mjs && node --check scripts/setup.mjs && node --check scripts/doctor.mjs && node --check scripts/cli.mjs && node --check windows/wechat_transcript_common.mjs && node --check windows/wechat_channels_export_metadata_post.mjs && node --check windows/wechat_direct_audio_pipeline.mjs && node --check windows/wechat_direct_marathon.mjs && node --check windows/enrich_existing_wechat_transcripts.mjs && node --check windows/prepare_wechat_audio_queue.mjs && node --check windows/verify_wechat_download_integrity.mjs && node --check windows/wechat_transcribe_booster_watcher.mjs && node --check windows/wechat_download_supervisor.mjs && node --check windows/wechat_auto_finalize_watcher.mjs"
   },
   "engines": {

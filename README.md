@@ -33,13 +33,24 @@ After those prerequisites are ready, the project can run the batch workflow from
 
 ## Quick Start
 
+For full setup instructions, including paths for Codex users and manual ZIP
+users, see [`INSTALL.md`](INSTALL.md).
+
 ```powershell
 git clone https://github.com/Evander764/wechat-channels-audio-transcripts.git
 cd wechat-channels-audio-transcripts
-npm run setup
+npm.cmd run setup
 ```
 
-Create a Python environment for transcription:
+On Windows, the bootstrap helper can create the project config, runtime folders,
+and transcription Python environment:
+
+```powershell
+npm.cmd run bootstrap:windows
+```
+
+If you do not use the bootstrap helper, create a Python environment for
+transcription manually:
 
 ```powershell
 python -m venv .runtime\transcript-venv
