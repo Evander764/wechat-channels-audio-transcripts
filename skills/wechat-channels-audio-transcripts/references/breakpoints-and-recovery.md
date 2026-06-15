@@ -17,7 +17,7 @@ Use this before restarting or repairing a WeChat Channels run.
    - Recovery: re-open the account profile, scroll to the bottom until no new cards appear, then export metadata again. Treat `object_id` count as the source of truth.
 
 4. **Duplicate direct downloader batches**
-   - Symptom: multiple `wechat_direct_marathon.mjs`, `wechat_direct_audio_pipeline.mjs`, or many extra `curl.exe` processes.
+   - Symptom: multiple `wechat_direct_marathon.mjs`, `wechat_direct_audio_pipeline.mjs`, or many extra `curl`/`curl.exe` processes.
    - Recovery: stop old downloader/supervisor processes before starting a new batch. Keep transcription watchers separate.
 
 5. **`curl: (18)` incomplete response**
@@ -25,8 +25,8 @@ Use this before restarting or repairing a WeChat Channels run.
    - Recovery: keep a stable temp file keyed by `object_id`, use `curl --continue-at -`, and fall back to range chunks after repeated `18`, `28`, `56`, or timeout errors.
 
 6. **Hung curl children**
-   - Symptom: outer Node process times out but `curl.exe` stays alive.
-   - Recovery: on Windows, kill the child process tree with `taskkill.exe /PID <pid> /T /F`.
+   - Symptom: outer Node process times out but `curl` stays alive.
+   - Recovery: on Windows, kill the child process tree with `taskkill.exe /PID <pid> /T /F`; on macOS, use `ps` to locate the child process and terminate it.
 
 7. **`decrypted header does not look like media`**
    - Causes:
@@ -62,17 +62,17 @@ Use this before restarting or repairing a WeChat Channels run.
 4. Stop duplicate downloader processes.
 5. Restart one marathon batch with:
 
-```powershell
-node .\windows\wechat_direct_marathon.mjs `
-  --completed-manifest "<latest-manifest.json>" `
-  --batch-limit 120 `
-  --transcribe-limit 0 `
-  --concurrency 8 `
-  --max-concurrency 8 `
-  --model small `
-  --order shortest `
-  --skip-batch-transcribe `
-  --stop-after-no-progress 4 `
+```bash
+node ./pipeline/wechat_direct_marathon.mjs \
+  --completed-manifest "<latest-manifest.json>" \
+  --batch-limit 120 \
+  --transcribe-limit 0 \
+  --concurrency 8 \
+  --max-concurrency 8 \
+  --model small \
+  --order shortest \
+  --skip-batch-transcribe \
+  --stop-after-no-progress 4 \
   --timeout-ms 240000
 ```
 

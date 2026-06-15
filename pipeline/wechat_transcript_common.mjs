@@ -5,18 +5,29 @@ import { fileURLToPath } from 'node:url';
 
 export const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
+export function defaultOutputRoot() {
+  const mediaDir = process.platform === 'darwin' ? 'Movies' : 'Videos';
+  return path.join(os.homedir(), mediaDir, 'WeChat Channels Downloads');
+}
+
+export function defaultTranscribePython() {
+  return process.platform === 'win32'
+    ? path.join(PROJECT_ROOT, '.runtime', 'transcript-venv', 'Scripts', 'python.exe')
+    : path.join(PROJECT_ROOT, '.runtime', 'transcript-venv', 'bin', 'python');
+}
+
 export function expandPath(value) {
   if (!value) return '';
   let text = String(value);
   text = text.replace(/^~(?=$|[\\/])/, os.homedir());
   text = text.replace(/%USERPROFILE%/gi, process.env.USERPROFILE || os.homedir());
   text = text.replace(/%LOCALAPPDATA%/gi, process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'));
+  if (process.platform !== 'win32') text = text.replace(/\\/g, '/');
   return path.resolve(text);
 }
 
 export const DEFAULT_OUTPUT_ROOT = expandPath(
-  process.env.WECHAT_CHANNELS_OUTPUT_ROOT ||
-    path.join(process.env.USERPROFILE || os.homedir(), 'Videos', 'WeChat Channels Downloads'),
+  process.env.WECHAT_CHANNELS_OUTPUT_ROOT || defaultOutputRoot(),
 );
 
 export const DEFAULT_ROOT = expandPath(
@@ -27,18 +38,17 @@ export const DEFAULT_ROOT = expandPath(
 export const DEFAULT_METADATA_JSON = expandPath(process.env.WECHAT_CHANNELS_METADATA_JSON || '');
 
 export const DEFAULT_TRANSCRIBE_PYTHON = expandPath(
-  process.env.WECHAT_TRANSCRIBE_PYTHON ||
-    path.join(PROJECT_ROOT, '.runtime', 'transcript-venv', 'Scripts', 'python.exe'),
+  process.env.WECHAT_TRANSCRIBE_PYTHON || defaultTranscribePython(),
 );
 
 export const DEFAULT_TRANSCRIBE_SCRIPT = expandPath(
   process.env.WECHAT_TRANSCRIBE_SCRIPT ||
-    path.join(PROJECT_ROOT, 'windows', 'transcribe_audio.py'),
+    path.join(PROJECT_ROOT, 'pipeline', 'transcribe_audio.py'),
 );
 
 export const DEFAULT_TRANSCRIBE_BATCH_SCRIPT = expandPath(
   process.env.WECHAT_TRANSCRIBE_BATCH_SCRIPT ||
-    path.join(PROJECT_ROOT, 'windows', 'transcribe_wechat_audio_batch.py'),
+    path.join(PROJECT_ROOT, 'pipeline', 'transcribe_wechat_audio_batch.py'),
 );
 
 export function stripBom(text) {

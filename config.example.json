@@ -1,7 +1,7 @@
 {
   "wxChannelBaseUrl": "http://127.0.0.1:2025",
-  "outputRoot": "%USERPROFILE%\\Videos\\WeChat Channels Downloads",
-  "workRoot": "%USERPROFILE%\\Videos\\WeChat Channels Downloads\\audio_transcripts_dynamic",
+  "outputRoot": "~/Movies/WeChat Channels Downloads",
+  "workRoot": "~/Movies/WeChat Channels Downloads/audio_transcripts_dynamic",
   "metadataJson": "",
   "maxPages": 300,
   "accounts": [
@@ -21,11 +21,11 @@
     "stopAfterNoProgress": 4
   },
   "transcription": {
-    "python": "python",
+    "python": ".runtime/transcript-venv/bin/python",
     "model": "small",
     "language": "zh",
-    "device": "cuda",
-    "computeType": "float16",
+    "device": "cpu",
+    "computeType": "int8",
     "transcribeLimit": 120,
     "allowCpuFallback": true,
     "cudaDllDirs": []

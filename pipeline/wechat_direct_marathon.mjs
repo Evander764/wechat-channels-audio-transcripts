@@ -152,7 +152,7 @@ async function main() {
     if (before >= total) break;
 
     await run('node', [
-      './windows/wechat_direct_audio_pipeline.mjs',
+      './pipeline/wechat_direct_audio_pipeline.mjs',
       ...(manifest ? ['--completed-manifest', manifest] : []),
       '--root', args.root,
       '--output-root', args.outputRoot,
@@ -181,7 +181,7 @@ async function main() {
     }
 
     const enriched = await run('node', [
-      './windows/enrich_existing_wechat_transcripts.mjs',
+      './pipeline/enrich_existing_wechat_transcripts.mjs',
       '--root', args.root,
       '--output-root', args.outputRoot,
       '--metadata-json', args.metadataJson,
@@ -193,7 +193,7 @@ async function main() {
     manifest = path.join(enrichedJson.outDir, 'manifest.json');
 
     await run('node', [
-      './windows/prepare_wechat_audio_queue.mjs',
+      './pipeline/prepare_wechat_audio_queue.mjs',
       '--completed-manifest', manifest,
       '--metadata-json', args.metadataJson,
       '--output-root', args.outputRoot,

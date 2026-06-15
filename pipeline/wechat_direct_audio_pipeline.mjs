@@ -16,6 +16,14 @@ import {
 
 const DEFAULT_DETAIL_BASE = `${process.env.WX_CHANNEL_BASE_URL || `http://127.0.0.1:${process.env.WX_CHANNEL_PORT || 2025}`}/api/channels/feed/profile`;
 const MASK = (1n << 64n) - 1n;
+const CURL_COMMAND = process.platform === 'win32' ? 'curl.exe' : 'curl';
+const MEDIA_USER_AGENT = process.platform === 'darwin'
+  ? 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+  : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+
+function curlBaseArgs() {
+  return process.platform === 'win32' ? ['--ssl-no-revoke'] : [];
+}
 
 function u64(value) {
   return value & MASK;
@@ -422,8 +430,8 @@ async function downloadRangeChunk(url, file, row, start, end, timeoutMs) {
   const chunkTimeoutMs = Math.min(Math.max(timeoutMs, 180_000), 420_000);
   for (let attempt = 1; attempt <= 5; attempt += 1) {
     try {
-      await run('curl.exe', [
-        '--ssl-no-revoke',
+      await run(CURL_COMMAND, [
+        ...curlBaseArgs(),
         '--fail',
         '--location',
         '--retry', '1',
@@ -434,7 +442,7 @@ async function downloadRangeChunk(url, file, row, start, end, timeoutMs) {
         '--range', `${start}-${end}`,
         '-H', 'Origin: https://channels.weixin.qq.com',
         '-H', `Referer: ${row.wechat_feed_url || 'https://channels.weixin.qq.com/'}`,
-        '-H', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        '-H', `User-Agent: ${MEDIA_USER_AGENT}`,
         '-D', headersFile,
         '-o', partFile,
         url,
@@ -491,7 +499,7 @@ async function download(url, file, row, timeoutMs, key) {
     try {
       const resume = (await existingSize(file)) > 0;
       const curlArgs = [
-        '--ssl-no-revoke',
+        ...curlBaseArgs(),
         '--fail',
         '--location',
         '--retry', '0',
@@ -501,12 +509,12 @@ async function download(url, file, row, timeoutMs, key) {
         '--max-time', String(curlMaxSeconds),
         '-H', 'Origin: https://channels.weixin.qq.com',
         '-H', `Referer: ${row.wechat_feed_url || 'https://channels.weixin.qq.com/'}`,
-        '-H', 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        '-H', `User-Agent: ${MEDIA_USER_AGENT}`,
         '-o', file,
         url,
       ];
       if (resume) curlArgs.splice(curlArgs.length - 3, 0, '--continue-at', '-');
-      await run('curl.exe', curlArgs, { timeoutMs: timeoutMs + 15000 });
+      await run(CURL_COMMAND, curlArgs, { timeoutMs: timeoutMs + 15000 });
       break;
     } catch (error) {
       lastError = error;
@@ -517,7 +525,7 @@ async function download(url, file, row, timeoutMs, key) {
         await removeMediaAndSidecar(file);
       }
       if (attempt === 5) {
-        if (/curl\.exe (exited 18|exited 28|exited 56|timed out)|timed out after|server closed abruptly/i.test(String(lastError.message || ''))) {
+        if (/(curl|curl\.exe) (exited 18|exited 28|exited 56|timed out)|timed out after|server closed abruptly/i.test(String(lastError.message || ''))) {
           return downloadByRanges(url, file, row, timeoutMs, key);
         }
         throw lastError;

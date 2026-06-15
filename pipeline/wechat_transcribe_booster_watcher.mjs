@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { execFile, spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 
 import {
   DEFAULT_ROOT,
@@ -8,6 +8,7 @@ import {
   DEFAULT_TRANSCRIBE_PYTHON,
   PROJECT_ROOT,
 } from './wechat_transcript_common.mjs';
+import { activeCommandLineCount } from './processes.mjs';
 
 function parseArgs(argv) {
   const args = {
@@ -80,41 +81,8 @@ async function backlog(root) {
   };
 }
 
-function psJson(command) {
-  return new Promise((resolve, reject) => {
-    execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', command], {
-      windowsHide: true,
-      maxBuffer: 2 * 1024 * 1024,
-    }, (error, stdout, stderr) => {
-      if (error) {
-        reject(new Error(`${error.message}\n${stderr || ''}`.trim()));
-        return;
-      }
-      const text = stdout.trim();
-      if (!text) {
-        resolve(null);
-        return;
-      }
-      try {
-        resolve(JSON.parse(text));
-      } catch (parseError) {
-        reject(new Error(`PowerShell JSON parse failed: ${parseError.message}\n${text}`));
-      }
-    });
-  });
-}
-
 async function activeBoosterCount() {
-  const command = `
-$items = Get-CimInstance Win32_Process | Where-Object {
-  $_.Name -eq 'python.exe' -and
-  $_.CommandLine -like '*transcribe_wechat_audio_batch.py*' -and
-  $_.CommandLine -like '*no-cpu-fallback*'
-}
-@($items).Count | ConvertTo-Json
-`;
-  const count = await psJson(command);
-  return Number(count || 0);
+  return activeCommandLineCount(['transcribe_wechat_audio_batch.py', 'no-cpu-fallback']);
 }
 
 async function startBooster(args) {

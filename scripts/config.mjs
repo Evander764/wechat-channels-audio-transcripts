@@ -7,12 +7,32 @@ export const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.
 export const DEFAULT_CONFIG = path.join(PROJECT_ROOT, 'wechat.config.json');
 export const EXAMPLE_CONFIG = path.join(PROJECT_ROOT, 'config.example.json');
 
+export function defaultOutputRoot() {
+  const mediaDir = process.platform === 'darwin' ? 'Movies' : 'Videos';
+  return path.join(os.homedir(), mediaDir, 'WeChat Channels Downloads');
+}
+
+export function defaultTranscribePython() {
+  return process.platform === 'win32'
+    ? path.join(PROJECT_ROOT, '.runtime', 'transcript-venv', 'Scripts', 'python.exe')
+    : path.join(PROJECT_ROOT, '.runtime', 'transcript-venv', 'bin', 'python');
+}
+
+export function defaultTranscriptionDevice() {
+  return process.platform === 'win32' ? 'cuda' : 'cpu';
+}
+
+export function defaultTranscriptionComputeType(device = defaultTranscriptionDevice()) {
+  return device === 'cuda' ? 'float16' : 'int8';
+}
+
 export function expandPath(value, base = PROJECT_ROOT) {
   if (!value) return '';
   let text = String(value);
   text = text.replace(/^~(?=$|[\\/])/, os.homedir());
   text = text.replace(/%USERPROFILE%/gi, process.env.USERPROFILE || os.homedir());
   text = text.replace(/%LOCALAPPDATA%/gi, process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'));
+  if (process.platform !== 'win32') text = text.replace(/\\/g, '/');
   if (/^[a-zA-Z]:[\\/]/.test(text) || text.startsWith('\\\\')) return path.resolve(text);
   return path.resolve(base, text);
 }
@@ -45,10 +65,11 @@ export async function loadConfig(configPath = DEFAULT_CONFIG) {
 }
 
 export function normalizeConfig(config, configPath = DEFAULT_CONFIG) {
-  const outputRoot = expandPath(config.outputRoot || path.join(os.homedir(), 'Videos', 'WeChat Channels Downloads'));
+  const outputRoot = expandPath(config.outputRoot || defaultOutputRoot());
   const workRoot = expandPath(config.workRoot || path.join(outputRoot, 'audio_transcripts_dynamic'));
   const transcription = config.transcription || {};
   const download = config.download || {};
+  const device = transcription.device || defaultTranscriptionDevice();
   return {
     ...config,
     configPath,
@@ -68,11 +89,11 @@ export function normalizeConfig(config, configPath = DEFAULT_CONFIG) {
       stopAfterNoProgress: Number(download.stopAfterNoProgress || 4),
     },
     transcription: {
-      python: resolveCommandOrPath(transcription.python || 'python'),
+      python: resolveCommandOrPath(transcription.python || defaultTranscribePython()),
       model: transcription.model || 'small',
       language: transcription.language || 'zh',
-      device: transcription.device || 'cuda',
-      computeType: transcription.computeType || 'float16',
+      device,
+      computeType: transcription.computeType || defaultTranscriptionComputeType(device),
       transcribeLimit: Number(transcription.transcribeLimit || 120),
       allowCpuFallback: transcription.allowCpuFallback !== false,
       cudaDllDirs: Array.isArray(transcription.cudaDllDirs) ? transcription.cudaDllDirs : [],
@@ -104,8 +125,8 @@ export function buildEnv(config) {
     WECHAT_CHANNELS_WORK_ROOT: config.workRoot,
     WECHAT_CHANNELS_METADATA_JSON: config.metadataJson || '',
     WECHAT_TRANSCRIBE_PYTHON: config.transcription.python,
-    WECHAT_TRANSCRIBE_SCRIPT: path.join(PROJECT_ROOT, 'windows', 'transcribe_audio.py'),
-    WECHAT_TRANSCRIBE_BATCH_SCRIPT: path.join(PROJECT_ROOT, 'windows', 'transcribe_wechat_audio_batch.py'),
+    WECHAT_TRANSCRIBE_SCRIPT: path.join(PROJECT_ROOT, 'pipeline', 'transcribe_audio.py'),
+    WECHAT_TRANSCRIBE_BATCH_SCRIPT: path.join(PROJECT_ROOT, 'pipeline', 'transcribe_wechat_audio_batch.py'),
     WECHAT_CUDA_DLL_DIRS: cudaDllDirs.join(path.delimiter),
   };
 }

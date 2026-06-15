@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { execFile, spawn } from 'node:child_process';
+import { spawn } from 'node:child_process';
 
 import {
   DEFAULT_OUTPUT_ROOT,
@@ -10,6 +10,7 @@ import {
   PROJECT_ROOT,
   readJson,
 } from './wechat_transcript_common.mjs';
+import { activeCommandLineCount } from './processes.mjs';
 
 function parseArgs(argv) {
   const args = {
@@ -85,41 +86,10 @@ async function totalCount(args) {
   return rows.filter((row) => row.is_video !== false && row.object_id && row.object_nonce_id).length;
 }
 
-function psJson(command) {
-  return new Promise((resolve, reject) => {
-    execFile('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', command], {
-      windowsHide: true,
-      maxBuffer: 2 * 1024 * 1024,
-    }, (error, stdout, stderr) => {
-      if (error) {
-        reject(new Error(`${error.message}\n${stderr || ''}`.trim()));
-        return;
-      }
-      const text = stdout.trim();
-      if (!text) {
-        resolve(null);
-        return;
-      }
-      try {
-        resolve(JSON.parse(text));
-      } catch (parseError) {
-        reject(new Error(`PowerShell JSON parse failed: ${parseError.message}\n${text}`));
-      }
-    });
-  });
-}
-
 async function activeDownloaderCount() {
-  const command = `
-$ErrorActionPreference = "Stop"
-$items = Get-CimInstance Win32_Process | Where-Object {
-  ($_.Name -eq 'node.exe' -or $_.Name -eq 'cmd.exe') -and
-  ($_.CommandLine -like '*wechat_direct_marathon.mjs*' -or $_.CommandLine -like '*wechat_direct_audio_pipeline.mjs*')
-}
-@($items).Count | ConvertTo-Json
-`;
-  const count = await psJson(command);
-  return Number(count || 0);
+  const marathon = await activeCommandLineCount(['wechat_direct_marathon.mjs']);
+  const pipeline = await activeCommandLineCount(['wechat_direct_audio_pipeline.mjs']);
+  return marathon + pipeline;
 }
 
 async function startMarathon(manifest, args) {
@@ -133,7 +103,7 @@ async function startMarathon(manifest, args) {
   const stdout = await fs.open(stdoutPath, 'a');
   const stderr = await fs.open(stderrPath, 'a');
   const child = spawn(process.execPath, [
-    './windows/wechat_direct_marathon.mjs',
+    './pipeline/wechat_direct_marathon.mjs',
     ...(manifest ? ['--completed-manifest', manifest] : []),
     '--output-root', args.outputRoot,
     '--metadata-json', args.metadataJson,

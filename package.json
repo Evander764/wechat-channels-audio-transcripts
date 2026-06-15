@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Collect WeChat Channels video metadata, download audio, transcribe speech, and package transcript datasets on Windows.",
+  "description": "Collect WeChat Channels video metadata, download audio, transcribe speech, and package transcript datasets on macOS and Windows.",
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "doctor": "node scripts/doctor.mjs",
@@ -15,7 +15,20 @@
     "package": "node scripts/cli.mjs package",
     "run": "node scripts/cli.mjs run",
     "bootstrap:windows": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap-windows.ps1",
-    "check": "node --check scripts/config.mjs && node --check scripts/setup.mjs && node --check scripts/doctor.mjs && node --check scripts/cli.mjs && node --check windows/wechat_transcript_common.mjs && node --check windows/wechat_channels_export_metadata_post.mjs && node --check windows/wechat_direct_audio_pipeline.mjs && node --check windows/wechat_direct_marathon.mjs && node --check windows/enrich_existing_wechat_transcripts.mjs && node --check windows/prepare_wechat_audio_queue.mjs && node --check windows/verify_wechat_download_integrity.mjs && node --check windows/wechat_transcribe_booster_watcher.mjs && node --check windows/wechat_download_supervisor.mjs && node --check windows/wechat_auto_finalize_watcher.mjs"
+    "mac:setup": "node scripts/mac-direct.mjs setup",
+    "mac:doctor": "node scripts/mac-direct.mjs doctor",
+    "mac:cert:install": "node scripts/mac-direct.mjs cert-install",
+    "mac:listen": "node scripts/mac-direct.mjs listen",
+    "mac:stop": "node scripts/mac-direct.mjs stop",
+    "mac:status": "node scripts/mac-direct.mjs status",
+    "mac:captures": "node scripts/mac-direct.mjs captures",
+    "mac:download-latest": "node scripts/mac-direct.mjs download-latest",
+    "mac:download": "node scripts/mac-direct.mjs download",
+    "mac:download-transcribe": "node scripts/mac-direct.mjs download-transcribe",
+    "mac:record-current": "node scripts/mac-direct.mjs record-current",
+    "mac:test-parser": "python3 macos/Tests/test_capture_parser.py",
+    "test": "node --test",
+    "check": "node --check scripts/config.mjs && node --check scripts/setup.mjs && node --check scripts/doctor.mjs && node --check scripts/archive.mjs && node --check scripts/cli.mjs && node --check scripts/mac-direct.mjs && node --check pipeline/wechat_transcript_common.mjs && node --check pipeline/processes.mjs && node --check pipeline/wechat_channels_export_metadata_post.mjs && node --check pipeline/wechat_direct_audio_pipeline.mjs && node --check pipeline/wechat_direct_marathon.mjs && node --check pipeline/enrich_existing_wechat_transcripts.mjs && node --check pipeline/prepare_wechat_audio_queue.mjs && node --check pipeline/verify_wechat_download_integrity.mjs && node --check pipeline/wechat_transcribe_booster_watcher.mjs && node --check pipeline/wechat_download_supervisor.mjs && node --check pipeline/wechat_auto_finalize_watcher.mjs"
   },
   "engines": {
     "node": ">=18"

@@ -16,7 +16,7 @@ from faster_whisper import WhisperModel
 DEFAULT_ROOT = Path(
     os.environ.get(
         "WECHAT_CHANNELS_WORK_ROOT",
-        Path.home() / "Videos" / "WeChat Channels Downloads" / "audio_transcripts_dynamic",
+        Path.home() / "Movies" / "WeChat Channels Downloads" / "audio_transcripts_dynamic",
     )
 )
 CUDA_DLL_DIRS = [
@@ -146,8 +146,8 @@ def main() -> int:
     parser.add_argument("--root", default=str(DEFAULT_ROOT))
     parser.add_argument("--model", default="small")
     parser.add_argument("--language", default="zh")
-    parser.add_argument("--device", default="cuda")
-    parser.add_argument("--compute-type", default="float16")
+    parser.add_argument("--device", default="cpu")
+    parser.add_argument("--compute-type", default="int8")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--vad-filter", action="store_true")

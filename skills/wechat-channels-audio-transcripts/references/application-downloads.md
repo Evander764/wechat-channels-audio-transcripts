@@ -4,10 +4,10 @@ Use official pages where possible. Do not bundle private cookies, WeChat session
 
 ## Required Applications
 
-- WeChat for Windows: `https://pc.weixin.qq.com/`
+- WeChat desktop: `https://weixin.qq.com/`
 - wx_channel: `https://github.com/nobiyou/wx_channel`
 - Node.js: `https://nodejs.org/en/download`
-- Python for Windows: `https://www.python.org/downloads/windows/`
+- Python: `https://www.python.org/downloads/`
 - FFmpeg/FFprobe: `https://ffmpeg.org/download.html`
 - Git: `https://git-scm.com/download/win`
 
@@ -15,16 +15,16 @@ Use official pages where possible. Do not bundle private cookies, WeChat session
 
 Install transcription dependencies in a venv or another dedicated Python environment:
 
-```powershell
-python -m venv .runtime\transcript-venv
-.\.runtime\transcript-venv\Scripts\python.exe -m pip install --upgrade pip
-.\.runtime\transcript-venv\Scripts\python.exe -m pip install faster-whisper ctranslate2
+```bash
+python3 -m venv .runtime/transcript-venv
+.runtime/transcript-venv/bin/python -m pip install --upgrade pip
+.runtime/transcript-venv/bin/python -m pip install faster-whisper ctranslate2
 ```
 
 Then set `transcription.python` in `wechat.config.json` to:
 
 ```text
-.runtime\transcript-venv\Scripts\python.exe
+.runtime/transcript-venv/bin/python
 ```
 
-For GPU transcription, confirm `nvidia-smi` works and configure `transcription.cudaDllDirs` if CTranslate2 cannot find CUDA DLLs.
+For GPU transcription on Windows, confirm `nvidia-smi` works and configure `transcription.cudaDllDirs` if CTranslate2 cannot find CUDA DLLs. macOS defaults to CPU/int8.

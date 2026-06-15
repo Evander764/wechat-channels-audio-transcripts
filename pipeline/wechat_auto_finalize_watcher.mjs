@@ -10,6 +10,7 @@ import {
   PROJECT_ROOT,
   readJson,
 } from './wechat_transcript_common.mjs';
+import { archivePaths } from '../scripts/archive.mjs';
 
 function parseArgs(argv) {
   const args = {
@@ -51,10 +52,6 @@ async function completedCount(manifest) {
   return Number(payload.completed_count ?? payload.rows?.length ?? 0);
 }
 
-function psSingle(value) {
-  return `'${String(value).replace(/'/g, "''")}'`;
-}
-
 function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
@@ -91,7 +88,7 @@ function extractJsonObject(text) {
 
 async function enrich(args) {
   const result = await run('node', [
-    './windows/enrich_existing_wechat_transcripts.mjs',
+    './pipeline/enrich_existing_wechat_transcripts.mjs',
     '--metadata-json', args.metadataJson,
     '--output-root', args.outputRoot,
   ], {
@@ -120,12 +117,7 @@ async function packageManifest(manifest, outputRoot) {
   }
   if (!paths.length) throw new Error(`nothing to package from ${outDir}`);
 
-  const command = [
-    '$ErrorActionPreference = "Stop"',
-    `$paths = @(${paths.map(psSingle).join(',')})`,
-    `Compress-Archive -LiteralPath $paths -DestinationPath ${psSingle(zipPath)} -Force`,
-  ].join('; ');
-  await run('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', command]);
+  await archivePaths({ cwd: outDir, zipPath, paths });
   return zipPath;
 }
 

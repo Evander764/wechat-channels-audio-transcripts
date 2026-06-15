@@ -12,6 +12,7 @@ import {
   saveConfig,
   writeJson,
 } from './config.mjs';
+import { archivePaths } from './archive.mjs';
 
 function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -74,13 +75,13 @@ async function latestManifest(outputRoot) {
 
 function commonMarathonArgs(config, includeTranscribe) {
   const args = [
-    './windows/wechat_direct_marathon.mjs',
+    './pipeline/wechat_direct_marathon.mjs',
     '--root', config.workRoot,
     '--output-root', config.outputRoot,
     '--metadata-json', config.metadataJson,
     '--python', config.transcription.python,
-    '--transcribe-script', path.join(PROJECT_ROOT, 'windows', 'transcribe_audio.py'),
-    '--transcribe-batch', path.join(PROJECT_ROOT, 'windows', 'transcribe_wechat_audio_batch.py'),
+    '--transcribe-script', path.join(PROJECT_ROOT, 'pipeline', 'transcribe_audio.py'),
+    '--transcribe-batch', path.join(PROJECT_ROOT, 'pipeline', 'transcribe_wechat_audio_batch.py'),
     '--batch-limit', String(config.download.batchLimit),
     '--transcribe-limit', String(config.transcription.transcribeLimit),
     '--concurrency', String(config.download.concurrency),
@@ -101,7 +102,7 @@ async function capture(config, env) {
   const accountsFile = path.join(PROJECT_ROOT, '.runtime', 'accounts.json');
   await writeJson(accountsFile, { accounts });
   const result = await run(process.execPath, [
-    './windows/wechat_channels_export_metadata_post.mjs',
+    './pipeline/wechat_channels_export_metadata_post.mjs',
     '--base-url', config.wxChannelBaseUrl,
     '--output-root', config.outputRoot,
     '--accounts-json', accountsFile,
@@ -122,7 +123,7 @@ async function download(config, env, includeTranscribe) {
 
 async function transcribe(config, env) {
   const args = [
-    './windows/transcribe_wechat_audio_batch.py',
+    './pipeline/transcribe_wechat_audio_batch.py',
     '--root', config.workRoot,
     '--limit', String(config.transcription.transcribeLimit),
     '--model', config.transcription.model,
@@ -136,7 +137,7 @@ async function transcribe(config, env) {
 
 async function enrich(config, env) {
   const result = await run(process.execPath, [
-    './windows/enrich_existing_wechat_transcripts.mjs',
+    './pipeline/enrich_existing_wechat_transcripts.mjs',
     '--root', config.workRoot,
     '--output-root', config.outputRoot,
     '--metadata-json', config.metadataJson,
@@ -148,7 +149,7 @@ async function verify(config, env, requireComplete = true) {
   const manifest = await latestManifest(config.outputRoot);
   if (!manifest) throw new Error('No final manifest found. Run npm run enrich first.');
   await run(process.execPath, [
-    './windows/verify_wechat_download_integrity.mjs',
+    './pipeline/verify_wechat_download_integrity.mjs',
     '--root', config.workRoot,
     '--output-root', config.outputRoot,
     '--metadata-json', config.metadataJson,
@@ -158,10 +159,6 @@ async function verify(config, env, requireComplete = true) {
   return manifest;
 }
 
-function psSingle(value) {
-  return `'${String(value).replace(/'/g, "''")}'`;
-}
-
 async function packageOutput(config) {
   const manifest = await latestManifest(config.outputRoot);
   if (!manifest) throw new Error('No final manifest found. Run npm run enrich first.');
@@ -169,20 +166,7 @@ async function packageOutput(config) {
   const zipPath = path.join(config.outputRoot, `${path.basename(outDir)}.zip`);
   const candidates = ['texts_with_metrics', 'json', 'manifest.json', 'manifest.csv']
     .map((name) => path.join(outDir, name));
-  const existing = [];
-  for (const item of candidates) {
-    try {
-      await fs.access(item);
-      existing.push(item);
-    } catch {}
-  }
-  if (!existing.length) throw new Error(`Nothing to package from ${outDir}`);
-  const command = [
-    '$ErrorActionPreference = "Stop"',
-    `$paths = @(${existing.map(psSingle).join(',')})`,
-    `Compress-Archive -LiteralPath $paths -DestinationPath ${psSingle(zipPath)} -Force`,
-  ].join('; ');
-  await run('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', command], { env: process.env });
+  await archivePaths({ cwd: outDir, zipPath, paths: candidates });
   console.log(JSON.stringify({ ok: true, zipPath, manifest }, null, 2));
 }
 

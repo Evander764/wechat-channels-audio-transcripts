@@ -10,7 +10,8 @@ import {
 } from './config.mjs';
 
 function commandExists(command) {
-  const result = spawnSync('where.exe', [command], { encoding: 'utf8' });
+  const locator = process.platform === 'win32' ? 'where.exe' : 'which';
+  const result = spawnSync(locator, [command], { encoding: 'utf8' });
   return result.status === 0;
 }
 
@@ -26,7 +27,7 @@ function pythonImport(command, moduleName) {
   const result = spawnSync(command, [
     '-c',
     `import ${moduleName}; print(getattr(${moduleName}, "__version__", "installed"))`,
-  ], { cwd: PROJECT_ROOT, encoding: 'utf8', timeout: 10000 });
+  ], { cwd: PROJECT_ROOT, encoding: 'utf8', timeout: 30000 });
   return {
     ok: result.status === 0,
     version: (result.stdout || '').trim(),
@@ -70,15 +71,23 @@ async function main() {
   }
 
   const env = buildEnv(config);
+  const curlCommand = process.platform === 'win32' ? 'curl.exe' : 'curl';
+  const gitCommand = process.platform === 'win32' ? 'git.exe' : 'git';
+  const archiveCheck = process.platform === 'win32'
+    ? commandVersion('powershell.exe', ['-NoProfile', '-Command', '$PSVersionTable.PSVersion.ToString()'])
+    : commandVersion('zip', ['-v']);
+
   const checks = {
+    platform: { ok: true, version: `${process.platform}/${process.arch}` },
     node: commandVersion('node'),
     ffmpeg: commandVersion('ffmpeg', ['-version']),
     ffprobe: commandVersion('ffprobe', ['-version']),
-    curl: commandVersion('curl.exe', ['--version']),
+    curl: commandVersion(curlCommand, ['--version']),
+    archive: archiveCheck,
     python: commandVersion(config.transcription.python, ['--version']),
     faster_whisper: pythonImport(config.transcription.python, 'faster_whisper'),
     ctranslate2: pythonImport(config.transcription.python, 'ctranslate2'),
-    git: commandExists('git.exe'),
+    git: { ok: commandExists(gitCommand), version: gitCommand },
     wx_channel: await checkWxChannel(config.wxChannelBaseUrl),
     accounts_configured: accountsConfigured(config).length,
     metadata_json_exists: await fileExists(config.metadataJson),
@@ -88,7 +97,7 @@ async function main() {
   };
 
   const hardFailures = [];
-  for (const name of ['node', 'ffmpeg', 'ffprobe', 'curl', 'python', 'faster_whisper', 'ctranslate2']) {
+  for (const name of ['node', 'ffmpeg', 'ffprobe', 'curl', 'archive', 'python', 'faster_whisper', 'ctranslate2']) {
     if (!checks[name].ok) hardFailures.push(name);
   }
   if (!checks.wx_channel.ok) hardFailures.push('wx_channel');
