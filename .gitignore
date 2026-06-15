@@ -1,0 +1,12 @@
+node_modules/
+.runtime/
+run_logs/
+__pycache__/
+*.pyc
+wechat.config.json
+*.log
+*.zip
+audio_transcripts_dynamic/
+wechat_channels_metadata_full_*/
+wechat_transcripts_with_metrics_existing_*/
+wechat_audio_transcript_queue_*/

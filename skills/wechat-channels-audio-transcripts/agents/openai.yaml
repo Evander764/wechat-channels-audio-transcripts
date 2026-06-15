@@ -1,0 +1,7 @@
+interface:
+  display_name: "WeChat Channels Audio Transcripts"
+  short_description: "Process WeChat Channels audio transcripts"
+  default_prompt: "Use $wechat-channels-audio-transcripts to process a WeChat Channels account end to end."
+
+policy:
+  allow_implicit_invocation: true

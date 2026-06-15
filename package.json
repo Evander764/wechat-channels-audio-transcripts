@@ -1,0 +1,30 @@
+{
+  "name": "wechat-channels-audio-transcripts",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Collect WeChat Channels video metadata, download audio, transcribe speech, and package transcript datasets on Windows.",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "capture": "node scripts/cli.mjs capture",
+    "download": "node scripts/cli.mjs download",
+    "transcribe": "node scripts/cli.mjs transcribe",
+    "enrich": "node scripts/cli.mjs enrich",
+    "verify": "node scripts/cli.mjs verify",
+    "package": "node scripts/cli.mjs package",
+    "run": "node scripts/cli.mjs run",
+    "check": "node --check scripts/config.mjs && node --check scripts/setup.mjs && node --check scripts/doctor.mjs && node --check scripts/cli.mjs && node --check windows/wechat_transcript_common.mjs && node --check windows/wechat_channels_export_metadata_post.mjs && node --check windows/wechat_direct_audio_pipeline.mjs && node --check windows/wechat_direct_marathon.mjs && node --check windows/enrich_existing_wechat_transcripts.mjs && node --check windows/prepare_wechat_audio_queue.mjs && node --check windows/verify_wechat_download_integrity.mjs && node --check windows/wechat_transcribe_booster_watcher.mjs && node --check windows/wechat_download_supervisor.mjs && node --check windows/wechat_auto_finalize_watcher.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "wechat",
+    "channels",
+    "audio",
+    "transcript",
+    "faster-whisper"
+  ],
+  "license": "MIT"
+}
