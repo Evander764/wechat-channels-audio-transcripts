@@ -1,5 +1,7 @@
 # WeChat Channels Downloader beta
 
+> **Historical / disabled path:** this app is retained for migration history and code review. Its local proxy-capture flow triggered WeChat account risk control and must not be used as the default workflow. Follow the parent repository's copied-share-link / SPH intake flow, with explicit recording fallback when needed. Do not run `proxy start` unless a future review explicitly re-authorizes and revalidates that design.
+
 Mac-native beta for capturing currently playable WeChat Channels media requests, downloading audio-only `.m4a` files from public video/live/replay streams, and falling back to current-window recording when network capture is not available.
 
 If you are using Codex to install and run this project, start with [INSTALL_FOR_CODEX.md](INSTALL_FOR_CODEX.md).

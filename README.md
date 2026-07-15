@@ -1,5 +1,7 @@
 # WeChat Channels Audio Transcripts
 
+The repository also retains the former standalone macOS downloader under [`apps/macos-downloader/`](apps/macos-downloader/) for reviewed migration history. Its proxy-capture path is disabled; see the [migration safety ruling](docs/migrations/wechat-channels-downloader-mac.md).
+
 macOS-capable workflow for WeChat Channels video accounts:
 
 1. directly capture and download audio from the currently playable WeChat Channels video on macOS;
