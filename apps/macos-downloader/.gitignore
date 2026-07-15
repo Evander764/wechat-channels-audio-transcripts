@@ -1,0 +1,23 @@
+.DS_Store
+
+# Swift build output
+.build/
+*.xcresult
+
+# Packaged app artifacts
+dist/
+*.app/
+*.dSYM/
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Local logs and runtime data
+logs/
+*.log
+captures.json
+downloads.json
+proxy-state.json
