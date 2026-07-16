@@ -1,77 +1,31 @@
 ---
 name: wechat-channels-audio-transcripts
-description: >
-  Use when a user needs WeChat Channels video audio links, audio downloads,
-  faster-whisper transcripts, account exports, or ltaoo/wx_channels_download
-  style macOS/Windows capture workflows.
+description: Historical WeChat Channels capture and transcription backend. Real work is Windows 5080 only and must be launched through the GitHub-first Information Intake control plane. Never open or process real WeChat content on macOS.
 ---
 
 # WeChat Channels Audio Transcripts
 
-Use this skill when the user wants to download a playable WeChat Channels video's audio on macOS, or process one or more WeChat Channels accounts on macOS or Windows.
+This repository preserves an older capture/transcription implementation. It is not an active Mac intake route.
 
-## Core Principle
+## Hard Boundary
 
-This workflow relies on the user's own logged-in WeChat session. The ltaoo/wx_channels_download pattern starts a local HTTPS proxy, trusts a local certificate, injects helper JavaScript into `channels.weixin.qq.com`, captures playable media/profile data, then downloads the captured media URL and decrypts or extracts audio with ffmpeg when needed.
+- Do not open WeChat Channels on macOS.
+- Do not capture, record, download, import, verify, package, or transcribe real WeChat content on macOS.
+- Do not treat old Mac commands, artifacts, or successful runs as current permission.
+- Keep historical source and fixtures as evidence; do not delete them merely because the route is retired.
 
-For agent automation, prefer this project's JSON commands over UI clicks. The source media URL appears as `data.url`; the saved audio file appears as `data.output`; transcript paths appear under `transcript.output_md` and `transcript.output_json`.
+All real work belongs to `win-desktop-5080` and must enter through `Evander764/information-intake`. That wrapper checks GitHub policy Issue #4, Windows log Issue #5, all-platform log Issue #6, and open PRs before content access.
 
-## Workflow
+## Active Workflow
 
-### macOS Current Video To Transcript
+1. Open the Information Intake repository on `win-desktop-5080`.
+2. Read the latest GitHub policy/log issues and open PRs.
+3. Run the unified Information Intake command with `--device-id win-desktop-5080`.
+4. Keep content bodies, source identifiers, credentials, private paths, and media out of GitHub.
+5. Record GitHub check time, run time, content-date range, current-day/backfill counts, ingest time/stage, verification, status, and blocker.
 
-1. Run `npm run mac:doctor`.
-2. If needed, run `npm run mac:setup` and `npm run mac:cert:install`.
-3. Run `npm run mac:listen`.
-4. Open WeChat desktop and play the target video.
-5. Run `npm run mac:captures` to inspect captured media.
-6. Run `npm run mac:download-transcribe -- --match "<title keyword>"`, or `--capture-id <id>` for an exact capture.
-7. Run `npm run mac:stop` after download to restore proxy settings.
-8. If capture fails, run `npm run mac:record-current -- --duration-seconds N`.
+Direct real-content commands in this repository fail closed unless invoked on the registered device with an explicit successful Information Intake preflight marker. Synthetic tests remain allowed. On Mac, only non-content status/cleanup of an already-existing helper is permitted.
 
-Use `npm run mac:download-latest` only when the user wants the audio file but not a transcript.
+## Completion Evidence
 
-### Batch Account Export
-
-1. Confirm WeChat desktop is logged in and the target Video Channels page opens normally.
-2. Confirm a compatible local helper API is running and its base URL is configured.
-3. Edit `wechat.config.json` with each account's raw `username`.
-4. Run `npm run doctor`.
-5. Run `npm run capture` to create `all_accounts.videos_only.json`.
-6. Run `npm run run`, or run `download`, `transcribe`, `enrich`, `verify`, and `package` separately.
-7. Treat `verify` as the source of truth before saying a batch is complete.
-
-## Evidence To Check
-
-- source video count from metadata;
-- final manifest row count;
-- unique `object_id` count;
-- duplicate `object_id` count;
-- missing IDs;
-- non-empty transcript files;
-- available metric fields such as likes, favorites, comments, forwards, and read/play count.
-
-## Commands
-
-```bash
-npm run setup
-npm run doctor
-npm run mac:doctor
-npm run mac:listen
-npm run mac:download-transcribe
-npm run mac:download-latest
-npm run mac:stop
-npm run capture
-npm run run
-npm run verify
-npm run package
-```
-
-Use `README.md` for install details and configuration shape. Read `references/ltaoo-wx-channels-download-principle.md` before changing the capture/download design.
-
-## Common Mistakes
-
-- Do not use the user's normal Chrome profile; this is a WeChat desktop workflow.
-- Do not promise downloads for content the logged-in account cannot already play.
-- Do not leave the proxy running after a capture; always run `npm run mac:stop`.
-- Do not treat `data.url` alone as completion; verify the audio file and transcript path exist.
+Completion requires a verified normalized manifest plus the sanitized GitHub log. A process exit, audio file, transcript, or historical artifact alone is not sufficient.

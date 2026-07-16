@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Collect WeChat Channels video metadata, download audio, transcribe speech, and package transcript datasets on macOS and Windows.",
+  "description": "Historical WeChat Channels backend; real work is routed through GitHub-first Information Intake on Windows 5080.",
   "scripts": {
     "setup": "node scripts/setup.mjs",
     "doctor": "node scripts/doctor.mjs",

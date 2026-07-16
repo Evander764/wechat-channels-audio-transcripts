@@ -8,6 +8,7 @@ import {
   configPathFromArg,
   loadConfig,
 } from './config.mjs';
+import { requireInformationIntakeControl } from './device-policy.mjs';
 
 function commandExists(command) {
   const locator = process.platform === 'win32' ? 'where.exe' : 'which';
@@ -59,6 +60,7 @@ async function checkWxChannel(baseUrl) {
 }
 
 async function main() {
+  requireInformationIntakeControl();
   const configPath = configPathFromArg();
   let config;
   try {

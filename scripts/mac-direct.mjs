@@ -15,6 +15,7 @@ import {
 const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MACOS_ROOT = path.join(PROJECT_ROOT, 'macos');
 const HELPER = path.join(MACOS_ROOT, '.build', 'release', 'wcd-helper');
+const MAC_RETIRED_MESSAGE = 'blocked: macOS WeChat Channels capture, recording, download, and transcription are retired; use win-desktop-5080 through Evander764/information-intake';
 
 const MEDIA_PRIORITY = {
   hls: 0,
@@ -331,6 +332,16 @@ function usage() {
 
 async function main() {
   const cli = parseArgs(process.argv.slice(2));
+  if (!['help', 'stop', 'status'].includes(cli.command)) {
+    console.log(JSON.stringify({
+      ok: false,
+      code: 'wechat_windows_5080_only',
+      message: MAC_RETIRED_MESSAGE,
+      data: { github_policy: 'Evander764/information-intake#4', windows_log: 'Evander764/information-intake#5' },
+    }, null, 2));
+    process.exitCode = 3;
+    return;
+  }
   if (cli.command === 'setup') await setup();
   else if (cli.command === 'doctor') await helper(['doctor', '--json'], { allowFailure: true, print: true });
   else if (cli.command === 'cert-install') await helper(['cert', 'install', '--json'], { allowFailure: false, print: true });

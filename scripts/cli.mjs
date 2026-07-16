@@ -13,6 +13,7 @@ import {
   writeJson,
 } from './config.mjs';
 import { archivePaths } from './archive.mjs';
+import { requireInformationIntakeControl } from './device-policy.mjs';
 
 function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -185,6 +186,7 @@ function commandFromArgs(argv) {
 async function main() {
   const argv = process.argv.slice(2);
   const command = commandFromArgs(argv);
+  if (command !== 'help') requireInformationIntakeControl();
   const configPath = configPathFromArg(argv);
   const config = await loadConfig(configPath);
   await ensureRuntimeDirs(config);
