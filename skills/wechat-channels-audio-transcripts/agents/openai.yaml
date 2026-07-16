@@ -1,7 +1,7 @@
 interface:
   display_name: "WeChat Channels Audio Transcripts"
-  short_description: "Process WeChat Channels audio transcripts"
-  default_prompt: "Use $wechat-channels-audio-transcripts to process a WeChat Channels account end to end."
+  short_description: "Route WeChat transcripts to Windows 5080"
+  default_prompt: "Use $wechat-channels-audio-transcripts to route real WeChat Channels work through the GitHub-first Information Intake control plane on win-desktop-5080."
 
 policy:
   allow_implicit_invocation: true
